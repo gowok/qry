@@ -10,7 +10,7 @@ type SelectQuery struct {
 	command string
 	columns string
 	table   string
-	where   string
+	where   bytes.Buffer
 	limit   int
 	offset  int
 
@@ -44,7 +44,11 @@ func (q SelectQuery) From(table string) SelectQuery {
 }
 
 func (q SelectQuery) Where(cond string) SelectQuery {
-	q.where = cond
+	if q.where.Len() <= 0 {
+		q.where.WriteString(cond)
+	} else {
+		q.where.WriteString(" AND " + cond)
+	}
 	return q
 }
 
@@ -117,8 +121,9 @@ func (q SelectQuery) SQL() string {
 		result.WriteString(" JOIN " + v)
 	}
 
-	if q.where != "" {
-		result.WriteString(" WHERE " + q.where)
+	if q.where.Len() > 0 {
+		result.WriteString(" WHERE ")
+		q.where.WriteTo(&result)
 	}
 
 	if len(q.orders) > 0 {

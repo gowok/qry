@@ -27,7 +27,7 @@ func TestSelectToSQL(t *testing.T) {
 
 	t.Run("prepared", func(t *testing.T) {
 		expected := "SELECT * FROM table WHERE a = 1 AND b = ?"
-		result := qry.Select().From("table").Where("a = 1 AND b = ?").SQL()
+		result := qry.Select().From("table").Where("a = 1").Where("b = ?").SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)
