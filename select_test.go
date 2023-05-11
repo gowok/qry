@@ -60,4 +60,20 @@ func TestSelectToSQL(t *testing.T) {
 		must.Equal(expected, result)
 	})
 
+	t.Run("prefix", func(t *testing.T) {
+		expected := "WITH a AS 1 SELECT a"
+		result := qry.Select("a").Prefix("WITH a AS 1").SQL()
+
+		must := must.New(t)
+		must.Equal(expected, result)
+	})
+
+	t.Run("suffix", func(t *testing.T) {
+		expected := "SELECT 1 FOR UPDATE"
+		result := qry.Select("1").Suffix("FOR UPDATE").SQL()
+
+		must := must.New(t)
+		must.Equal(expected, result)
+	})
+
 }

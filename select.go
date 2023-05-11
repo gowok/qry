@@ -17,6 +17,9 @@ type SelectQuery struct {
 	distinct bool
 	joins    []string
 	orders   []string
+
+	prefix string
+	suffix string
 }
 
 func Select(columns ...string) SelectQuery {
@@ -82,8 +85,23 @@ func (q SelectQuery) Desc(column string) SelectQuery {
 	return q.OrderBy(column, "DESC")
 }
 
+func (q SelectQuery) Prefix(prefix string) SelectQuery {
+	q.prefix = prefix
+	return q
+}
+
+func (q SelectQuery) Suffix(suffix string) SelectQuery {
+	q.suffix = suffix
+	return q
+}
+
 func (q SelectQuery) SQL() string {
 	result := bytes.Buffer{}
+
+	if q.prefix != "" {
+		result.WriteString(q.prefix + " ")
+	}
+
 	result.WriteString(q.command)
 	if q.distinct {
 		result.WriteString(" DISTINCT")
@@ -114,6 +132,10 @@ func (q SelectQuery) SQL() string {
 
 	if q.offset != 0 {
 		result.WriteString(fmt.Sprintf(" OFFSET %d", q.offset))
+	}
+
+	if q.suffix != "" {
+		result.WriteString(" " + q.suffix)
 	}
 
 	return result.String()
