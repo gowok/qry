@@ -17,8 +17,14 @@ func TestCreateToSQL(t *testing.T) {
 	})
 
 	t.Run("table", func(t *testing.T) {
-		expected := "CREATE TABLE users"
-		result := Create().Table("users").SQL()
+		expected := "CREATE TABLE users (id INT PRIMARY KEY, email TEXT NOT NULL)"
+		result := Create().
+			Table("users").
+			Columns(
+				"id INT PRIMARY KEY",
+				"email TEXT NOT NULL",
+			).
+			SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)

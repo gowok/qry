@@ -8,6 +8,7 @@ type CreateQuery struct {
 	command    string
 	name       string
 	createType DDLType
+	columns    []string
 }
 
 func Create() CreateQuery {
@@ -30,6 +31,11 @@ func (q CreateQuery) Table(name string) CreateQuery {
 	return q
 }
 
+func (q CreateQuery) Columns(columns ...string) CreateQuery {
+	q.columns = columns
+	return q
+}
+
 func (q CreateQuery) SQL() string {
 	result := bytes.Buffer{}
 	result.WriteString(q.command)
@@ -40,6 +46,17 @@ func (q CreateQuery) SQL() string {
 	}
 
 	result.WriteString(" " + q.name)
+
+	if len(q.columns) > 0 {
+		result.WriteString(" (")
+		for i, v := range q.columns {
+			if i > 0 {
+				result.WriteString(", ")
+			}
+			result.WriteString(v)
+		}
+		result.WriteString(")")
+	}
 
 	return result.String()
 }
