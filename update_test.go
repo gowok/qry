@@ -7,13 +7,22 @@ import (
 	"github.com/gowok/qry"
 )
 
+var testUpdate = map[string][]string{
+	"minimum": {
+		"UPDATE table SET a = 1, b = 2",
+		qry.Update("table").Set("a", 1).Set("b", 2).SQL(),
+	},
+	"where": {
+		"UPDATE table WHERE id = 1",
+		qry.Update("table").Where("id = 1").SQL(),
+	},
+}
+
 func TestUpdateToSQL(t *testing.T) {
-
-	t.Run("1", func(t *testing.T) {
-		expected := "UPDATE table SET a = 1, b = 2 WHERE c = ?"
-		result := qry.Update("table").Set("a", 1).Set("b", 2).Where("c = ?").SQL()
-
-		must := must.New(t)
-		must.Equal(expected, result)
-	})
+	for name, test := range testUpdate {
+		t.Run(name, func(t *testing.T) {
+			must := must.New(t)
+			must.Equal(test[0], test[1])
+		})
+	}
 }
