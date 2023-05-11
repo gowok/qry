@@ -48,8 +48,11 @@ func (q UpdateQuery) SQL() string {
 	result := bytes.Buffer{}
 	result.WriteString(q.command)
 	result.WriteString(" " + q.table)
-	result.WriteString(" SET ")
-	result.WriteString(strings.Join(q.sets, ", "))
+
+	if len(q.sets) > 0 {
+		result.WriteString(" SET ")
+		result.WriteString(strings.Join(q.sets, ", "))
+	}
 
 	if q.where != "" {
 		result.WriteString(" WHERE " + q.where)
