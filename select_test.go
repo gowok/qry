@@ -17,6 +17,14 @@ func TestSelectToSQL(t *testing.T) {
 		must.Equal(expected, result)
 	})
 
+	t.Run("distinct", func(t *testing.T) {
+		expected := "SELECT DISTINCT id FROM table"
+		result := qry.Select("id").Distinct().From("table").SQL()
+
+		must := must.New(t)
+		must.Equal(expected, result)
+	})
+
 	t.Run("prepared", func(t *testing.T) {
 		expected := "SELECT * FROM table WHERE a = 1 AND b = ?"
 		result := qry.Select().From("table").Where("a = 1 AND b = ?").SQL()

@@ -14,8 +14,9 @@ type SelectQuery struct {
 	limit   int
 	offset  int
 
-	joins  []string
-	orders []string
+	distinct bool
+	joins    []string
+	orders   []string
 }
 
 func Select(columns ...string) SelectQuery {
@@ -41,6 +42,11 @@ func (q SelectQuery) From(table string) SelectQuery {
 
 func (q SelectQuery) Where(cond string) SelectQuery {
 	q.where = cond
+	return q
+}
+
+func (q SelectQuery) Distinct() SelectQuery {
+	q.distinct = true
 	return q
 }
 
@@ -79,6 +85,10 @@ func (q SelectQuery) Desc(column string) SelectQuery {
 func (q SelectQuery) SQL() string {
 	result := bytes.Buffer{}
 	result.WriteString(q.command)
+	if q.distinct {
+		result.WriteString(" DISTINCT")
+	}
+
 	result.WriteString(" " + q.columns)
 
 	if q.table != "" {
