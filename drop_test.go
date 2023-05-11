@@ -1,16 +1,17 @@
-package qry
+package qry_test
 
 import (
 	"testing"
 
 	"github.com/golang-must/must"
+	"github.com/gowok/qry"
 )
 
 func TestDropToSQL(t *testing.T) {
 
 	t.Run("database", func(t *testing.T) {
 		expected := "DROP DATABASE company"
-		result := Drop().Database("company").SQL()
+		result := qry.Drop().Database("company").SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)
@@ -18,7 +19,7 @@ func TestDropToSQL(t *testing.T) {
 
 	t.Run("table", func(t *testing.T) {
 		expected := "DROP TABLE users"
-		result := Drop().Table("users").SQL()
+		result := qry.Drop().Table("users").SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)

@@ -1,13 +1,17 @@
 package qry
 
 type option struct {
-	driver string
+	Driver string
 }
 
 type OptionFunc func(*option)
 
 func WithDriver(driver string) OptionFunc {
 	return func(o *option) {
-		o.driver = driver
+		o.Driver = driver
 	}
+}
+
+func NewOption() *option {
+	return &option{}
 }
