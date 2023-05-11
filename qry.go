@@ -3,6 +3,6 @@ package qry
 type DDLType int
 
 const (
-	DDLTypeDatabase DDLType = iota
+	DDLTypeDatabase DDLType = iota + 1
 	DDLTypeTable
 )
