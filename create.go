@@ -9,6 +9,7 @@ type CreateQuery struct {
 	name       string
 	createType DDLType
 	columns    []string
+	ifExists   string
 }
 
 func Create() CreateQuery {
@@ -36,6 +37,16 @@ func (q CreateQuery) Columns(columns ...string) CreateQuery {
 	return q
 }
 
+func (q CreateQuery) IfExists() CreateQuery {
+	q.ifExists = "IF EXISTS"
+	return q
+}
+
+func (q CreateQuery) IfNotExists() CreateQuery {
+	q.ifExists = "IF NOT EXISTS"
+	return q
+}
+
 func (q CreateQuery) SQL() string {
 	result := bytes.Buffer{}
 	result.WriteString(q.command)
@@ -43,6 +54,10 @@ func (q CreateQuery) SQL() string {
 		result.WriteString(" DATABASE")
 	} else if q.createType == DDLTypeTable {
 		result.WriteString(" TABLE")
+	}
+
+	if q.ifExists != "" {
+		result.WriteString(" " + q.ifExists)
 	}
 
 	result.WriteString(" " + q.name)

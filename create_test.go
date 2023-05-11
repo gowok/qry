@@ -9,8 +9,8 @@ import (
 func TestCreateToSQL(t *testing.T) {
 
 	t.Run("database", func(t *testing.T) {
-		expected := "CREATE DATABASE company"
-		result := Create().Database("company").SQL()
+		expected := "CREATE DATABASE IF NOT EXISTS company"
+		result := Create().Database("company").IfNotExists().SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)
