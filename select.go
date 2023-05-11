@@ -68,6 +68,14 @@ func (q SelectQuery) OrderBy(column string, dir ...string) SelectQuery {
 	return q
 }
 
+func (q SelectQuery) Asc(column string) SelectQuery {
+	return q.OrderBy(column, "ASC")
+}
+
+func (q SelectQuery) Desc(column string) SelectQuery {
+	return q.OrderBy(column, "DESC")
+}
+
 func (q SelectQuery) SQL() string {
 	result := bytes.Buffer{}
 	result.WriteString(q.command)

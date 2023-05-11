@@ -44,8 +44,8 @@ func TestSelectToSQL(t *testing.T) {
 	})
 
 	t.Run("order", func(t *testing.T) {
-		expected := "SELECT * FROM table ORDER BY a ASC, b DESC"
-		result := Select().From("table").OrderBy("a").OrderBy("b", "DESC").SQL()
+		expected := "SELECT * FROM table ORDER BY a ASC, b DESC, c ASC"
+		result := Select().From("table").OrderBy("a").Desc("b").Asc("c").SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)
