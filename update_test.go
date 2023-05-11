@@ -16,6 +16,10 @@ var testUpdate = map[string][]string{
 		"UPDATE table WHERE id = 1",
 		qry.Update("table").Where("id = 1").SQL(),
 	},
+	"sufix": {
+		"UPDATE table RETURNING *",
+		qry.Update("table").Suffix("RETURNING *").SQL(),
+	},
 }
 
 func TestUpdateToSQL(t *testing.T) {

@@ -29,11 +29,6 @@ func (q UpdateQuery) Set(col string, val any) UpdateQuery {
 	return q
 }
 
-func (q UpdateQuery) Values(vals ...string) UpdateQuery {
-	q.values = strings.Join(vals, ", ")
-	return q
-}
-
 func (q UpdateQuery) Where(cond string) UpdateQuery {
 	q.where = cond
 	return q
