@@ -5,11 +5,11 @@ import (
 )
 
 type CreateQuery struct {
-	command    string
-	name       string
-	createType DDLType
-	columns    []string
-	ifExists   string
+	command     string
+	name        string
+	createType  DDLType
+	columns     []string
+	ifNotExists bool
 }
 
 func Create() CreateQuery {
@@ -37,13 +37,8 @@ func (q CreateQuery) Columns(columns ...string) CreateQuery {
 	return q
 }
 
-func (q CreateQuery) IfExists() CreateQuery {
-	q.ifExists = "IF EXISTS"
-	return q
-}
-
 func (q CreateQuery) IfNotExists() CreateQuery {
-	q.ifExists = "IF NOT EXISTS"
+	q.ifNotExists = true
 	return q
 }
 
@@ -56,8 +51,8 @@ func (q CreateQuery) SQL() string {
 		result.WriteString(" TABLE")
 	}
 
-	if q.ifExists != "" {
-		result.WriteString(" " + q.ifExists)
+	if q.ifNotExists {
+		result.WriteString(" IF NOT EXISTS")
 	}
 
 	result.WriteString(" " + q.name)
