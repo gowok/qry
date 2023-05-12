@@ -52,6 +52,19 @@ func (q SelectQuery) Where(cond string) SelectQuery {
 	return q
 }
 
+func (q SelectQuery) OrWhere(cond string) SelectQuery {
+	if q.where.Len() <= 0 {
+		q.where.WriteString(cond)
+	} else {
+		q.where.WriteString(" OR " + cond)
+	}
+	return q
+}
+
+func (q SelectQuery) AndWhere(cond string) SelectQuery {
+	return q.Where(cond)
+}
+
 func (q SelectQuery) Distinct() SelectQuery {
 	q.distinct = true
 	return q

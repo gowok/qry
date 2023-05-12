@@ -26,8 +26,24 @@ func TestSelectToSQL(t *testing.T) {
 	})
 
 	t.Run("prepared", func(t *testing.T) {
-		expected := "SELECT * FROM table WHERE a = 1 AND b = ?"
-		result := qry.Select().From("table").Where("a = 1").Where("b = ?").SQL()
+		expected := "SELECT * FROM table WHERE a = ?"
+		result := qry.Select().From("table").Where("a = ?").SQL()
+
+		must := must.New(t)
+		must.Equal(expected, result)
+	})
+
+	t.Run("where", func(t *testing.T) {
+		expected := "SELECT * FROM table WHERE a = ? AND b = ?"
+		result := qry.Select().From("table").OrWhere("a = ?").AndWhere("b = ?").SQL()
+
+		must := must.New(t)
+		must.Equal(expected, result)
+	})
+
+	t.Run("where 2", func(t *testing.T) {
+		expected := "SELECT * FROM table WHERE a = ? OR b = ?"
+		result := qry.Select().From("table").AndWhere("a = ?").OrWhere("b = ?").SQL()
 
 		must := must.New(t)
 		must.Equal(expected, result)
