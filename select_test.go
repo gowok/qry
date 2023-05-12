@@ -42,10 +42,12 @@ func TestSelectToSQL(t *testing.T) {
 	})
 
 	t.Run("join", func(t *testing.T) {
-		expected := "SELECT * FROM table1 t1 JOIN table2 t2 ON t1.table2_id=t2.id JOIN table3 t3 ON t1.table3_id=t3.id"
+		expected := "SELECT * FROM table1 t1 JOIN table2 t2 ON t1.table2_id=t2.id LEFT JOIN table3 t3 ON t1.table3_id=t3.id RIGHT JOIN table4 t4 ON t1.table4_id=t4.id INNER JOIN table5 t5 ON t1.table5_id=t5.id"
 		result := qry.Select().From("table1 t1").
 			Join("table2 t2", "t1.table2_id=t2.id").
-			Join("table3 t3", "t1.table3_id=t3.id").
+			LeftJoin("table3 t3", "t1.table3_id=t3.id").
+			RightJoin("table4 t4", "t1.table4_id=t4.id").
+			InnerJoin("table5 t5", "t1.table5_id=t5.id").
 			SQL()
 
 		must := must.New(t)

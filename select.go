@@ -68,7 +68,22 @@ func (q SelectQuery) Offset(offset int) SelectQuery {
 }
 
 func (q SelectQuery) Join(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("%s ON %s", table, cond))
+	q.joins = append(q.joins, fmt.Sprintf("JOIN %s ON %s", table, cond))
+	return q
+}
+
+func (q SelectQuery) LeftJoin(table string, cond string) SelectQuery {
+	q.joins = append(q.joins, fmt.Sprintf("LEFT JOIN %s ON %s", table, cond))
+	return q
+}
+
+func (q SelectQuery) RightJoin(table string, cond string) SelectQuery {
+	q.joins = append(q.joins, fmt.Sprintf("RIGHT JOIN %s ON %s", table, cond))
+	return q
+}
+
+func (q SelectQuery) InnerJoin(table string, cond string) SelectQuery {
+	q.joins = append(q.joins, fmt.Sprintf("INNER JOIN %s ON %s", table, cond))
 	return q
 }
 
@@ -118,7 +133,7 @@ func (q SelectQuery) SQL() string {
 	}
 
 	for _, v := range q.joins {
-		result.WriteString(" JOIN " + v)
+		result.WriteString(" " + v)
 	}
 
 	if q.where.Len() > 0 {
