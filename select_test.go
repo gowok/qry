@@ -35,3 +35,22 @@ func TestSelectToSQL(t *testing.T) {
 	}
 
 }
+
+func BenchmarkSelectSimple(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		qry.Select("1").SQL()
+	}
+}
+
+func BenchmarkSelectComplex(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		qry.Select().From("table1 t1").
+			Join("table2 t2", "t1.table2_id=t2.id").
+			LeftJoin("table3 t3", "t1.table3_id=t3.id").
+			RightJoin("table4 t4", "t1.table4_id=t4.id").
+			InnerJoin("table5 t5", "t1.table5_id=t5.id").
+			SQL()
+	}
+}
