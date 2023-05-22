@@ -24,6 +24,7 @@ func TestSelectToSQL(t *testing.T) {
 		"SELECT * FROM table ORDER BY a ASC, b DESC, c ASC": qry.Select().From("table").OrderBy("a").Desc("b").Asc("c").SQL(),
 		"WITH a AS 1 SELECT a":                              qry.Select("a").Prefix("WITH a AS 1").SQL(),
 		"SELECT 1 FOR UPDATE":                               qry.Select("1").Suffix("FOR UPDATE").SQL(),
+		"SELECT * FROM teams GROUP BY score, groups":        qry.Select().From("teams").GroupBy("score").GroupBy("groups").SQL(),
 	}
 
 	for expected, result := range cases {

@@ -17,6 +17,7 @@ type SelectQuery struct {
 	distinct bool
 	joins    []string
 	orders   []string
+	group    []string
 
 	prefix string
 	suffix string
@@ -63,6 +64,11 @@ func (q SelectQuery) OrWhere(cond string) SelectQuery {
 
 func (q SelectQuery) AndWhere(cond string) SelectQuery {
 	return q.Where(cond)
+}
+
+func (q SelectQuery) GroupBy(column string) SelectQuery {
+	q.group = append(q.group, column)
+	return q
 }
 
 func (q SelectQuery) Distinct() SelectQuery {
@@ -152,6 +158,11 @@ func (q SelectQuery) SQL() string {
 	if q.where.Len() > 0 {
 		result.WriteString(" WHERE ")
 		q.where.WriteTo(&result)
+	}
+
+	if len(q.group) > 0 {
+		result.WriteString(" GROUP BY ")
+		result.WriteString(strings.Join(q.group, ", "))
 	}
 
 	if len(q.orders) > 0 {
