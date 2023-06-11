@@ -2,6 +2,7 @@ package qry
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 )
 
@@ -34,6 +35,12 @@ func (q InsertQuery) Values(vals ...string) InsertQuery {
 
 func (q InsertQuery) Suffix(suffix string) InsertQuery {
 	q.suffix = suffix
+	return q
+}
+
+func (q InsertQuery) Set(col string, val string) InsertQuery {
+	q.columns += fmt.Sprintf(", %s", col)
+	q.values += fmt.Sprintf(", %s", val)
 	return q
 }
 
