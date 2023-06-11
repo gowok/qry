@@ -10,8 +10,22 @@ import (
 func TestInsertToSQL(t *testing.T) {
 
 	testCases := map[string]string{
-		"INSERT INTO table(a, b, c) VALUES(1, ?, ?) RETURNING a": qry.Insert("table").Column("a", "b", "c").Values("1", "?", "?").Suffix("RETURNING a").SQL(),
-		"INSERT INTO table(a, b, c) VALUES(1, 1, ?) RETURNING a": qry.Insert("table").Column("a").Values("1").Set("b", "1").Set("c", "?").Suffix("RETURNING a").SQL(),
+		"INSERT INTO table(a, b, c) VALUES(1, ?, ?) RETURNING a": func() string {
+			q := qry.Insert("table")
+			q.Column("a", "b", "c")
+			q.Values("1", "?", "?")
+			q.Suffix("RETURNING a")
+			return q.SQL()
+		}(),
+		"INSERT INTO table(a, b, c) VALUES(1, 1, ?) RETURNING a": func() string {
+			q := qry.Insert("table")
+			q.Column("a")
+			q.Values("1")
+			q.Set("b", "1")
+			q.Set("c", "?")
+			q.Suffix("RETURNING a")
+			return q.SQL()
+		}(),
 	}
 
 	for expected, result := range testCases {

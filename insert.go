@@ -14,34 +14,30 @@ type InsertQuery struct {
 	suffix  string
 }
 
-func Insert(table string) InsertQuery {
+func Insert(table string) *InsertQuery {
 	q := InsertQuery{
 		command: "INSERT INTO",
 		table:   table,
 	}
 
-	return q
+	return &q
 }
 
-func (q InsertQuery) Column(cols ...string) InsertQuery {
+func (q *InsertQuery) Column(cols ...string) {
 	q.columns = strings.Join(cols, ", ")
-	return q
 }
 
-func (q InsertQuery) Values(vals ...string) InsertQuery {
+func (q *InsertQuery) Values(vals ...string) {
 	q.values = strings.Join(vals, ", ")
-	return q
 }
 
-func (q InsertQuery) Suffix(suffix string) InsertQuery {
+func (q *InsertQuery) Suffix(suffix string) {
 	q.suffix = suffix
-	return q
 }
 
-func (q InsertQuery) Set(col string, val string) InsertQuery {
+func (q *InsertQuery) Set(col string, val string) {
 	q.columns += fmt.Sprintf(", %s", col)
 	q.values += fmt.Sprintf(", %s", val)
-	return q
 }
 
 func (q InsertQuery) SQL() string {
