@@ -10,15 +10,28 @@ import (
 var testUpdate = map[string][]string{
 	"minimum": {
 		"UPDATE table SET a = 1, b = 2",
-		qry.Update("table").Set("a", 1).Set("b", 2).SQL(),
+		func() string {
+			q := qry.Update("table")
+			q.Set("a", 1)
+			q.Set("b", 2)
+			return q.SQL()
+		}(),
 	},
 	"where": {
 		"UPDATE table WHERE id = 1",
-		qry.Update("table").Where("id = 1").SQL(),
+		func() string {
+			q := qry.Update("table")
+			q.Where("id = 1")
+			return q.SQL()
+		}(),
 	},
 	"sufix": {
 		"UPDATE table RETURNING *",
-		qry.Update("table").Suffix("RETURNING *").SQL(),
+		func() string {
+			q := qry.Update("table")
+			q.Suffix("RETURNING *")
+			return q.SQL()
+		}(),
 	},
 }
 

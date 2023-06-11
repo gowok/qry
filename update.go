@@ -15,28 +15,25 @@ type UpdateQuery struct {
 	suffix  string
 }
 
-func Update(table string) UpdateQuery {
+func Update(table string) *UpdateQuery {
 	q := UpdateQuery{
 		command: "UPDATE",
 		table:   table,
 	}
 
-	return q
+	return &q
 }
 
-func (q UpdateQuery) Set(col string, val any) UpdateQuery {
+func (q *UpdateQuery) Set(col string, val any) {
 	q.sets = append(q.sets, fmt.Sprintf("%s = %v", col, val))
-	return q
 }
 
-func (q UpdateQuery) Where(cond string) UpdateQuery {
+func (q *UpdateQuery) Where(cond string) {
 	q.where = cond
-	return q
 }
 
-func (q UpdateQuery) Suffix(suffix string) UpdateQuery {
+func (q *UpdateQuery) Suffix(suffix string) {
 	q.suffix = suffix
-	return q
 }
 
 func (q UpdateQuery) SQL() string {
