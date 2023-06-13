@@ -36,8 +36,14 @@ func (q *InsertQuery) Suffix(suffix string) {
 }
 
 func (q *InsertQuery) Set(col string, val string) {
-	q.columns += fmt.Sprintf(", %s", col)
-	q.values += fmt.Sprintf(", %s", val)
+	if q.columns != "" {
+		q.columns += ", "
+	}
+	if q.values != "" {
+		q.values += ", "
+	}
+	q.columns += fmt.Sprintf("%s", col)
+	q.values += fmt.Sprintf("%s", val)
 }
 
 func (q InsertQuery) SQL() string {

@@ -19,8 +19,7 @@ func TestInsertToSQL(t *testing.T) {
 		}(),
 		"INSERT INTO table(a, b, c) VALUES(1, 1, ?) RETURNING a": func() string {
 			q := qry.Insert("table")
-			q.Column("a")
-			q.Values("1")
+			q.Set("a", "1")
 			q.Set("b", "1")
 			q.Set("c", "?")
 			q.Suffix("RETURNING a")
