@@ -141,54 +141,113 @@ func (q SelectQuery) Suffix(suffix string) SelectQuery {
 	return q
 }
 
-func (q SelectQuery) SQL() string {
-	var result strings.Builder
-
+// AppendTo appends the statement to dst and returns the extended slice. It
+// does not allocate as long as dst has enough spare capacity, which makes it
+// the allocation-free way to render a query.
+func (q SelectQuery) AppendTo(dst []byte) []byte {
 	if q.prefix != "" {
-		result.WriteString(q.prefix + " ")
+		dst = append(dst, q.prefix...)
+		dst = append(dst, ' ')
 	}
 
-	result.WriteString(q.command)
+	dst = append(dst, q.command...)
 	if q.distinct {
-		result.WriteString(" DISTINCT")
+		dst = append(dst, " DISTINCT"...)
 	}
 
-	result.WriteString(" " + q.columns)
+	dst = append(dst, ' ')
+	dst = append(dst, q.columns...)
 
 	if q.table != "" {
-		result.WriteString(" FROM " + q.table)
+		dst = append(dst, " FROM "...)
+		dst = append(dst, q.table...)
 	}
 
 	for _, v := range q.joins {
-		result.WriteString(" " + v)
+		dst = append(dst, ' ')
+		dst = append(dst, v...)
 	}
 
 	if q.where != "" {
-		result.WriteString(" WHERE ")
-		result.WriteString(q.where)
+		dst = append(dst, " WHERE "...)
+		dst = append(dst, q.where...)
 	}
 
 	if len(q.group) > 0 {
-		result.WriteString(" GROUP BY ")
-		result.WriteString(strings.Join(q.group, ", "))
+		dst = append(dst, " GROUP BY "...)
+		dst = appendJoin(dst, ", ", q.group)
 	}
 
 	if len(q.orders) > 0 {
-		result.WriteString(" ORDER BY ")
-		result.WriteString(strings.Join(q.orders, ", "))
+		dst = append(dst, " ORDER BY "...)
+		dst = appendJoin(dst, ", ", q.orders)
 	}
 
 	if q.limit != 0 {
-		result.WriteString(" LIMIT " + strconv.Itoa(q.limit))
+		dst = append(dst, " LIMIT "...)
+		dst = strconv.AppendInt(dst, int64(q.limit), 10)
 	}
 
 	if q.offset != 0 {
-		result.WriteString(" OFFSET " + strconv.Itoa(q.offset))
+		dst = append(dst, " OFFSET "...)
+		dst = strconv.AppendInt(dst, int64(q.offset), 10)
 	}
 
 	if q.suffix != "" {
-		result.WriteString(" " + q.suffix)
+		dst = append(dst, ' ')
+		dst = append(dst, q.suffix...)
 	}
 
-	return result.String()
+	return dst
+}
+
+// appendSize reports the exact number of bytes AppendTo writes.
+func (q SelectQuery) appendSize() int {
+	n := len(q.command) + len(q.columns) + 1
+
+	if q.prefix != "" {
+		n += len(q.prefix) + 1
+	}
+
+	if q.distinct {
+		n += len(" DISTINCT")
+	}
+
+	if q.table != "" {
+		n += len(" FROM ") + len(q.table)
+	}
+
+	for _, v := range q.joins {
+		n += len(v) + 1
+	}
+
+	if q.where != "" {
+		n += len(" WHERE ") + len(q.where)
+	}
+
+	if len(q.group) > 0 {
+		n += len(" GROUP BY ") + joinSize(", ", q.group)
+	}
+
+	if len(q.orders) > 0 {
+		n += len(" ORDER BY ") + joinSize(", ", q.orders)
+	}
+
+	if q.limit != 0 {
+		n += len(" LIMIT ") + intSize(q.limit)
+	}
+
+	if q.offset != 0 {
+		n += len(" OFFSET ") + intSize(q.offset)
+	}
+
+	if q.suffix != "" {
+		n += len(q.suffix) + 1
+	}
+
+	return n
+}
+
+func (q SelectQuery) SQL() string {
+	return string(q.AppendTo(make([]byte, 0, q.appendSize())))
 }

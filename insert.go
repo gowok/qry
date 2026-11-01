@@ -45,16 +45,43 @@ func (q *InsertQuery) Set(col string, val string) {
 	q.values += val
 }
 
-func (q InsertQuery) SQL() string {
-	var result strings.Builder
-	result.WriteString(q.command)
-	result.WriteString(" " + q.table)
-	result.WriteString("(" + q.columns + ")")
-	result.WriteString(" VALUES")
-	result.WriteString("(" + q.values + ")")
+// AppendTo appends the statement to dst and returns the extended slice. It
+// does not allocate as long as dst has enough spare capacity.
+func (q InsertQuery) AppendTo(dst []byte) []byte {
+	dst = append(dst, q.command...)
+	dst = append(dst, ' ')
+	dst = append(dst, q.table...)
+	dst = append(dst, '(')
+	dst = append(dst, q.columns...)
+	dst = append(dst, ')')
+	dst = append(dst, " VALUES"...)
+	dst = append(dst, '(')
+	dst = append(dst, q.values...)
+	dst = append(dst, ')')
 
 	if q.suffix != "" {
-		result.WriteString(" " + q.suffix)
+		dst = append(dst, ' ')
+		dst = append(dst, q.suffix...)
 	}
-	return result.String()
+
+	return dst
+}
+
+// appendSize reports the exact number of bytes AppendTo writes.
+func (q InsertQuery) appendSize() int {
+	// Two paren pairs: one around the columns, one around the values.
+	const parens = 4
+
+	n := len(q.command) + len(" ") + len(q.table) + parens + len(q.columns) +
+		len(" VALUES") + len(q.values)
+
+	if q.suffix != "" {
+		n += len(" ") + len(q.suffix)
+	}
+
+	return n
+}
+
+func (q InsertQuery) SQL() string {
+	return string(q.AppendTo(make([]byte, 0, q.appendSize())))
 }

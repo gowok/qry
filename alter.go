@@ -1,7 +1,5 @@
 package qry
 
-import "strings"
-
 // AlterQuery accumulates a SQL ALTER statement. Methods return an updated copy,
 // so a query can be built up incrementally.
 type AlterQuery struct {
@@ -43,24 +41,55 @@ func (q AlterQuery) Table(name string) AlterQuery {
 	return q
 }
 
-func (q AlterQuery) SQL() string {
-	var result strings.Builder
-	result.WriteString(q.command)
-	if q.createType == DDLTypeDatabase {
-		result.WriteString(" DATABASE")
-	} else if q.createType == DDLTypeTable {
-		result.WriteString(" TABLE")
+// AppendTo appends the statement to dst and returns the extended slice. It
+// does not allocate as long as dst has enough spare capacity.
+func (q AlterQuery) AppendTo(dst []byte) []byte {
+	dst = append(dst, q.command...)
+	switch q.createType {
+	case DDLTypeDatabase:
+		dst = append(dst, " DATABASE"...)
+	case DDLTypeTable:
+		dst = append(dst, " TABLE"...)
 	}
 
-	result.WriteString(" " + q.name)
+	dst = append(dst, ' ')
+	dst = append(dst, q.name...)
 
 	if q.renameTo != "" {
-		result.WriteString(" RENAME TO " + q.renameTo)
+		dst = append(dst, " RENAME TO "...)
+		dst = append(dst, q.renameTo...)
 	}
 
 	if q.addColumn != "" {
-		result.WriteString(" ADD COLUMN " + q.addColumn)
+		dst = append(dst, " ADD COLUMN "...)
+		dst = append(dst, q.addColumn...)
 	}
 
-	return result.String()
+	return dst
+}
+
+// appendSize reports the exact number of bytes AppendTo writes.
+func (q AlterQuery) appendSize() int {
+	n := len(q.command) + len(q.name) + 1
+
+	switch q.createType {
+	case DDLTypeDatabase:
+		n += len(" DATABASE")
+	case DDLTypeTable:
+		n += len(" TABLE")
+	}
+
+	if q.renameTo != "" {
+		n += len(" RENAME TO ") + len(q.renameTo)
+	}
+
+	if q.addColumn != "" {
+		n += len(" ADD COLUMN ") + len(q.addColumn)
+	}
+
+	return n
+}
+
+func (q AlterQuery) SQL() string {
+	return string(q.AppendTo(make([]byte, 0, q.appendSize())))
 }

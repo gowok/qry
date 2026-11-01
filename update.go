@@ -1,9 +1,6 @@
 package qry
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
 // UpdateQuery accumulates a SQL UPDATE statement. Unlike the other builders it
 // is mutated in place.
@@ -37,22 +34,50 @@ func (q *UpdateQuery) Suffix(suffix string) {
 	q.suffix = suffix
 }
 
-func (q UpdateQuery) SQL() string {
-	var result strings.Builder
-	result.WriteString(q.command)
-	result.WriteString(" " + q.table)
+// AppendTo appends the statement to dst and returns the extended slice. It
+// does not allocate as long as dst has enough spare capacity.
+func (q UpdateQuery) AppendTo(dst []byte) []byte {
+	dst = append(dst, q.command...)
+	dst = append(dst, ' ')
+	dst = append(dst, q.table...)
 
 	if len(q.sets) > 0 {
-		result.WriteString(" SET ")
-		result.WriteString(strings.Join(q.sets, ", "))
+		dst = append(dst, " SET "...)
+		dst = appendJoin(dst, ", ", q.sets)
 	}
 
 	if q.where != "" {
-		result.WriteString(" WHERE " + q.where)
+		dst = append(dst, " WHERE "...)
+		dst = append(dst, q.where...)
 	}
 
 	if q.suffix != "" {
-		result.WriteString(" " + q.suffix)
+		dst = append(dst, ' ')
+		dst = append(dst, q.suffix...)
 	}
-	return result.String()
+
+	return dst
+}
+
+// appendSize reports the exact number of bytes AppendTo writes.
+func (q UpdateQuery) appendSize() int {
+	n := len(q.command) + len(q.table) + 1
+
+	if len(q.sets) > 0 {
+		n += len(" SET ") + joinSize(", ", q.sets)
+	}
+
+	if q.where != "" {
+		n += len(" WHERE ") + len(q.where)
+	}
+
+	if q.suffix != "" {
+		n += len(q.suffix) + 1
+	}
+
+	return n
+}
+
+func (q UpdateQuery) SQL() string {
+	return string(q.AppendTo(make([]byte, 0, q.appendSize())))
 }

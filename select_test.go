@@ -73,6 +73,7 @@ func TestSelectCopiesAreIndependent(t *testing.T) {
 }
 
 func BenchmarkSelectSimple(b *testing.B) {
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		qry.Select("1").SQL()
@@ -80,6 +81,7 @@ func BenchmarkSelectSimple(b *testing.B) {
 }
 
 func BenchmarkSelectComplex(b *testing.B) {
+	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		qry.Select().From("table1 t1").
