@@ -1,9 +1,9 @@
 package qry
 
-import (
-	"bytes"
-)
+import "strings"
 
+// CreateQuery accumulates a SQL CREATE statement. Methods return an updated
+// copy, so a query can be built up incrementally.
 type CreateQuery struct {
 	command     string
 	name        string
@@ -12,6 +12,7 @@ type CreateQuery struct {
 	ifNotExists bool
 }
 
+// Create starts a CREATE statement.
 func Create() CreateQuery {
 	q := CreateQuery{
 		command: "CREATE",
@@ -43,7 +44,7 @@ func (q CreateQuery) IfNotExists() CreateQuery {
 }
 
 func (q CreateQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 	result.WriteString(q.command)
 	if q.createType == DDLTypeDatabase {
 		result.WriteString(" DATABASE")

@@ -23,4 +23,3 @@ func TestAggregateSimple(t *testing.T) {
 		})
 	}
 }
-

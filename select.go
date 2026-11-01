@@ -2,10 +2,12 @@ package qry
 
 import (
 	"bytes"
-	"fmt"
+	"strconv"
 	"strings"
 )
 
+// SelectQuery accumulates a SQL SELECT statement. Methods return an updated
+// copy, so a query can be built up incrementally.
 type SelectQuery struct {
 	command string
 	columns string
@@ -23,6 +25,7 @@ type SelectQuery struct {
 	suffix string
 }
 
+// Select starts a SELECT query. When no columns are given, "*" is used.
 func Select(columns ...string) SelectQuery {
 	q := SelectQuery{
 		command: "SELECT",
@@ -87,22 +90,22 @@ func (q SelectQuery) Offset(offset int) SelectQuery {
 }
 
 func (q SelectQuery) Join(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("JOIN %s ON %s", table, cond))
+	q.joins = append(q.joins, "JOIN "+table+" ON "+cond)
 	return q
 }
 
 func (q SelectQuery) LeftJoin(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("LEFT JOIN %s ON %s", table, cond))
+	q.joins = append(q.joins, "LEFT JOIN "+table+" ON "+cond)
 	return q
 }
 
 func (q SelectQuery) RightJoin(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("RIGHT JOIN %s ON %s", table, cond))
+	q.joins = append(q.joins, "RIGHT JOIN "+table+" ON "+cond)
 	return q
 }
 
 func (q SelectQuery) InnerJoin(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, fmt.Sprintf("INNER JOIN %s ON %s", table, cond))
+	q.joins = append(q.joins, "INNER JOIN "+table+" ON "+cond)
 	return q
 }
 
@@ -111,7 +114,7 @@ func (q SelectQuery) OrderBy(column string, dir ...string) SelectQuery {
 		dir = []string{"ASC"}
 	}
 
-	q.orders = append(q.orders, fmt.Sprintf("%s %s", column, dir[0]))
+	q.orders = append(q.orders, column+" "+dir[0])
 	return q
 }
 
@@ -134,7 +137,7 @@ func (q SelectQuery) Suffix(suffix string) SelectQuery {
 }
 
 func (q SelectQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 
 	if q.prefix != "" {
 		result.WriteString(q.prefix + " ")
@@ -157,7 +160,7 @@ func (q SelectQuery) SQL() string {
 
 	if q.where.Len() > 0 {
 		result.WriteString(" WHERE ")
-		q.where.WriteTo(&result)
+		result.WriteString(q.where.String())
 	}
 
 	if len(q.group) > 0 {
@@ -171,11 +174,11 @@ func (q SelectQuery) SQL() string {
 	}
 
 	if q.limit != 0 {
-		result.WriteString(fmt.Sprintf(" LIMIT %d", q.limit))
+		result.WriteString(" LIMIT " + strconv.Itoa(q.limit))
 	}
 
 	if q.offset != 0 {
-		result.WriteString(fmt.Sprintf(" OFFSET %d", q.offset))
+		result.WriteString(" OFFSET " + strconv.Itoa(q.offset))
 	}
 
 	if q.suffix != "" {

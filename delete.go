@@ -1,15 +1,16 @@
 package qry
 
-import (
-	"bytes"
-)
+import "strings"
 
+// DeleteQuery accumulates a SQL DELETE statement. Methods return an updated
+// copy, so a query can be built up incrementally.
 type DeleteQuery struct {
 	command string
 	table   string
 	where   string
 }
 
+// Delete starts a DELETE FROM query for table.
 func Delete(table string) DeleteQuery {
 	q := DeleteQuery{
 		command: "DELETE FROM",
@@ -25,7 +26,7 @@ func (q DeleteQuery) Where(cond string) DeleteQuery {
 }
 
 func (q DeleteQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 	result.WriteString(q.command)
 	result.WriteString(" " + q.table)
 

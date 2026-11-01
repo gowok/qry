@@ -1,11 +1,9 @@
 package qry
 
-import (
-	"bytes"
-	"fmt"
-	"strings"
-)
+import "strings"
 
+// InsertQuery accumulates a SQL INSERT statement. Unlike the other builders it
+// is mutated in place.
 type InsertQuery struct {
 	command string
 	table   string
@@ -14,6 +12,7 @@ type InsertQuery struct {
 	suffix  string
 }
 
+// Insert starts an INSERT INTO query for table.
 func Insert(table string) *InsertQuery {
 	q := InsertQuery{
 		command: "INSERT INTO",
@@ -42,12 +41,12 @@ func (q *InsertQuery) Set(col string, val string) {
 	if q.values != "" {
 		q.values += ", "
 	}
-	q.columns += fmt.Sprintf("%s", col)
-	q.values += fmt.Sprintf("%s", val)
+	q.columns += col
+	q.values += val
 }
 
 func (q InsertQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 	result.WriteString(q.command)
 	result.WriteString(" " + q.table)
 	result.WriteString("(" + q.columns + ")")

@@ -1,9 +1,9 @@
 package qry
 
-import (
-	"bytes"
-)
+import "strings"
 
+// AlterQuery accumulates a SQL ALTER statement. Methods return an updated copy,
+// so a query can be built up incrementally.
 type AlterQuery struct {
 	command    string
 	name       string
@@ -12,6 +12,7 @@ type AlterQuery struct {
 	addColumn  string
 }
 
+// Alter starts an ALTER statement.
 func Alter() AlterQuery {
 	q := AlterQuery{
 		command: "ALTER",
@@ -43,7 +44,7 @@ func (q AlterQuery) Table(name string) AlterQuery {
 }
 
 func (q AlterQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 	result.WriteString(q.command)
 	if q.createType == DDLTypeDatabase {
 		result.WriteString(" DATABASE")

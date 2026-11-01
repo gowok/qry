@@ -1,17 +1,16 @@
 package qry
 
-import (
-	"bytes"
-)
+import "strings"
 
+// DropQuery accumulates a SQL DROP statement. Methods return an updated copy,
+// so a query can be built up incrementally.
 type DropQuery struct {
 	command    string
 	name       string
 	createType DDLType
-	renameTo   string
-	addColumn  string
 }
 
+// Drop starts a DROP statement.
 func Drop() DropQuery {
 	q := DropQuery{
 		command: "DROP",
@@ -33,7 +32,7 @@ func (q DropQuery) Table(name string) DropQuery {
 }
 
 func (q DropQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 	result.WriteString(q.command)
 	if q.createType == DDLTypeDatabase {
 		result.WriteString(" DATABASE")

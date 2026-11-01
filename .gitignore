@@ -1,2 +1,13 @@
-test.out
 .DS_Store
+.idea/
+.vscode/
+
+# Test and coverage artifacts
+*.test
+*.out
+cover.txt
+coverage.txt
+
+# Workspace files
+go.work
+go.work.sum

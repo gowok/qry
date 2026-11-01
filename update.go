@@ -1,20 +1,21 @@
 package qry
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 )
 
+// UpdateQuery accumulates a SQL UPDATE statement. Unlike the other builders it
+// is mutated in place.
 type UpdateQuery struct {
 	command string
 	table   string
 	sets    []string
-	values  string
 	where   string
 	suffix  string
 }
 
+// Update starts an UPDATE query for table.
 func Update(table string) *UpdateQuery {
 	q := UpdateQuery{
 		command: "UPDATE",
@@ -37,7 +38,7 @@ func (q *UpdateQuery) Suffix(suffix string) {
 }
 
 func (q UpdateQuery) SQL() string {
-	result := bytes.Buffer{}
+	var result strings.Builder
 	result.WriteString(q.command)
 	result.WriteString(" " + q.table)
 

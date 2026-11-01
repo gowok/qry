@@ -1,23 +1,26 @@
 package qry
 
-import "fmt"
-
+// Avg returns the SQL AVG aggregate of column.
 func Avg(column string) string {
-	return fmt.Sprintf("AVG(%s)", column)
+	return "AVG(" + column + ")"
 }
 
+// Count returns the SQL COUNT aggregate of column.
 func Count(column string) string {
-	return fmt.Sprintf("COUNT(%s)", column)
+	return "COUNT(" + column + ")"
 }
 
+// Max returns the SQL MAX aggregate of column.
 func Max(column string) string {
-	return fmt.Sprintf("MAX(%s)", column)
+	return "MAX(" + column + ")"
 }
 
+// Min returns the SQL MIN aggregate of column.
 func Min(column string) string {
-	return fmt.Sprintf("MIN(%s)", column)
+	return "MIN(" + column + ")"
 }
 
+// Sum returns the SQL SUM aggregate of column.
 func Sum(column string) string {
-	return fmt.Sprintf("SUM(%s)", column)
+	return "SUM(" + column + ")"
 }
