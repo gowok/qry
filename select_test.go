@@ -36,6 +36,42 @@ func TestSelectToSQL(t *testing.T) {
 
 }
 
+func TestSelectCopiesAreIndependent(t *testing.T) {
+	base := qry.Select().From("table").
+		Join("j1", "c1").
+		Join("j2", "c2").
+		Join("j3", "c3").
+		GroupBy("g1").
+		GroupBy("g2").
+		GroupBy("g3").
+		OrderBy("o1").
+		OrderBy("o2").
+		OrderBy("o3").
+		Where("a = ?")
+
+	first := base.AndWhere("b = ?").Join("j4", "c4").GroupBy("g4").OrderBy("o4")
+	second := base.OrWhere("x = ?").Join("j5", "c5").GroupBy("g5").OrderBy("o5")
+
+	cases := map[string]string{
+		"base":   "SELECT * FROM table JOIN j1 ON c1 JOIN j2 ON c2 JOIN j3 ON c3 WHERE a = ? GROUP BY g1, g2, g3 ORDER BY o1 ASC, o2 ASC, o3 ASC",
+		"first":  "SELECT * FROM table JOIN j1 ON c1 JOIN j2 ON c2 JOIN j3 ON c3 JOIN j4 ON c4 WHERE a = ? AND b = ? GROUP BY g1, g2, g3, g4 ORDER BY o1 ASC, o2 ASC, o3 ASC, o4 ASC",
+		"second": "SELECT * FROM table JOIN j1 ON c1 JOIN j2 ON c2 JOIN j3 ON c3 JOIN j5 ON c5 WHERE a = ? OR x = ? GROUP BY g1, g2, g3, g5 ORDER BY o1 ASC, o2 ASC, o3 ASC, o5 ASC",
+	}
+
+	results := map[string]string{
+		"base":   base.SQL(),
+		"first":  first.SQL(),
+		"second": second.SQL(),
+	}
+
+	for name, expected := range cases {
+		t.Run(name, func(t *testing.T) {
+			must := must.New(t)
+			must.Equal(expected, results[name])
+		})
+	}
+}
+
 func BenchmarkSelectSimple(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

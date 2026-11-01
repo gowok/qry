@@ -1,7 +1,6 @@
 package qry
 
 import (
-	"bytes"
 	"strconv"
 	"strings"
 )
@@ -12,7 +11,7 @@ type SelectQuery struct {
 	command string
 	columns string
 	table   string
-	where   bytes.Buffer
+	where   string
 	limit   int
 	offset  int
 
@@ -25,15 +24,21 @@ type SelectQuery struct {
 	suffix string
 }
 
+// pushString returns dst with value appended without sharing its backing array,
+// so queries copied by value never mutate each other.
+func pushString(dst []string, value string) []string {
+	out := make([]string, len(dst), len(dst)+1)
+	copy(out, dst)
+	return append(out, value)
+}
+
 // Select starts a SELECT query. When no columns are given, "*" is used.
 func Select(columns ...string) SelectQuery {
 	q := SelectQuery{
 		command: "SELECT",
-		joins:   make([]string, 0),
-		orders:  make([]string, 0),
 	}
 
-	if len(columns) <= 0 {
+	if len(columns) == 0 {
 		q.columns = "*"
 	} else {
 		q.columns = strings.Join(columns, ", ")
@@ -48,19 +53,19 @@ func (q SelectQuery) From(table string) SelectQuery {
 }
 
 func (q SelectQuery) Where(cond string) SelectQuery {
-	if q.where.Len() <= 0 {
-		q.where.WriteString(cond)
+	if q.where == "" {
+		q.where = cond
 	} else {
-		q.where.WriteString(" AND " + cond)
+		q.where += " AND " + cond
 	}
 	return q
 }
 
 func (q SelectQuery) OrWhere(cond string) SelectQuery {
-	if q.where.Len() <= 0 {
-		q.where.WriteString(cond)
+	if q.where == "" {
+		q.where = cond
 	} else {
-		q.where.WriteString(" OR " + cond)
+		q.where += " OR " + cond
 	}
 	return q
 }
@@ -70,7 +75,7 @@ func (q SelectQuery) AndWhere(cond string) SelectQuery {
 }
 
 func (q SelectQuery) GroupBy(column string) SelectQuery {
-	q.group = append(q.group, column)
+	q.group = pushString(q.group, column)
 	return q
 }
 
@@ -90,22 +95,22 @@ func (q SelectQuery) Offset(offset int) SelectQuery {
 }
 
 func (q SelectQuery) Join(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, "JOIN "+table+" ON "+cond)
+	q.joins = pushString(q.joins, "JOIN "+table+" ON "+cond)
 	return q
 }
 
 func (q SelectQuery) LeftJoin(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, "LEFT JOIN "+table+" ON "+cond)
+	q.joins = pushString(q.joins, "LEFT JOIN "+table+" ON "+cond)
 	return q
 }
 
 func (q SelectQuery) RightJoin(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, "RIGHT JOIN "+table+" ON "+cond)
+	q.joins = pushString(q.joins, "RIGHT JOIN "+table+" ON "+cond)
 	return q
 }
 
 func (q SelectQuery) InnerJoin(table string, cond string) SelectQuery {
-	q.joins = append(q.joins, "INNER JOIN "+table+" ON "+cond)
+	q.joins = pushString(q.joins, "INNER JOIN "+table+" ON "+cond)
 	return q
 }
 
@@ -114,7 +119,7 @@ func (q SelectQuery) OrderBy(column string, dir ...string) SelectQuery {
 		dir = []string{"ASC"}
 	}
 
-	q.orders = append(q.orders, column+" "+dir[0])
+	q.orders = pushString(q.orders, column+" "+dir[0])
 	return q
 }
 
@@ -158,9 +163,9 @@ func (q SelectQuery) SQL() string {
 		result.WriteString(" " + v)
 	}
 
-	if q.where.Len() > 0 {
+	if q.where != "" {
 		result.WriteString(" WHERE ")
-		result.WriteString(q.where.String())
+		result.WriteString(q.where)
 	}
 
 	if len(q.group) > 0 {
